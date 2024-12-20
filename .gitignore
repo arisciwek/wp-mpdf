@@ -32,6 +32,14 @@ wp-config.php
 # Log files
 *.log
 
+Libs mPDF file
+/libs/mpdf/
+
+Developments files
+
+.devels
+
+
 # htaccess
 /.htaccess
 
