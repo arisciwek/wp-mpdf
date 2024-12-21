@@ -105,44 +105,103 @@ function wp_mpdf_check_system_requirements() {
 add_action('admin_notices', 'wp_mpdf_check_system_requirements');
 
 // Only load the plugin if requirements are met
+
 if (wp_mpdf_check_system_requirements()) {
-    // Required files
+    // Load required files first
     require_once WP_MPDF_DIR . 'includes/class-wp-mpdf-loader.php';
     require_once WP_MPDF_DIR . 'includes/class-wp-mpdf.php';
     require_once WP_MPDF_DIR . 'includes/class-wp-mpdf-activator.php';
+    require_once WP_MPDF_DIR . 'includes/class-wp-mpdf-settings.php';
 
-    // Activation/Deactivation hooks
+    // Register activation/deactivation hooks
     register_activation_hook(__FILE__, array('WP_MPDF_Activator', 'activate'));
     register_deactivation_hook(__FILE__, array('WP_MPDF_Activator', 'deactivate'));
 
     /**
-     * Load plugin text domain for translations
-     */
-    function wp_mpdf_load_textdomain() {
-        load_plugin_textdomain(
-            'wp-mpdf',
-            false,
-            dirname(WP_MPDF_BASENAME) . '/languages/'
-        );
-    }
-    add_action('plugins_loaded', 'wp_mpdf_load_textdomain');
-
-    /**
      * Initialize plugin
      */
-	function run_wp_mpdf() {
-	    $plugin = WP_MPDF::get_instance(); 
-	    $plugin->run();
-	}
+    function run_wp_mpdf() {
+        error_log('WP mPDF: Initializing plugin');
+        
+        // Get plugin instance (will create if doesn't exist)
+        $plugin = WP_MPDF::get_instance();
+        
+        // Run the plugin
+        $plugin->run();
+        
+        error_log('WP mPDF: Plugin initialized');
+    }
 
+    if (!function_exists('wp_mpdf_get_library_path')) {
+        /**
+         * Get mPDF library base path
+         * 
+         * @return string|null Path to mPDF library or null if not available
+         */
+        function wp_mpdf_get_library_path() {
+            // Check if plugin exists and is activated
+            if (!defined('WP_MPDF_DIR')) {
+                return null;
+            }
+            
+            try {
+                return WP_MPDF_Activator::get_mpdf_base_path();
+            } catch (Exception $e) {
+                return null;
+            }
+        }
+    }
 
-    run_wp_mpdf();
-}
+    if (!function_exists('wp_mpdf_get_pdf_settings')) {
+        /**
+         * Get complete mPDF path settings for PDF generation
+         * 
+         * @return array|null Array of mPDF settings or null if not available
+         */
+        function wp_mpdf_get_pdf_settings() {
+            try {
+                return WP_MPDF_Activator::get_mpdf_paths();
+            } catch (Exception $e) {
+                return null;
+            }
+        }
+    }
+    
+    if (!function_exists('wp_mpdf_verify_library')) {
+        /**
+         * Verify mPDF library is complete and usable
+         * 
+         * @return bool True if library is available and complete
+         */
+        function wp_mpdf_verify_library() {
+            $path = wp_mpdf_get_library_path();
+            if (!$path) {
+                return false;
+            }
 
-/**
- * Helper function untuk akses global instance
- * @return WP_MPDF Main plugin instance
- */
-function wp_mpdf() {
-    return WP_MPDF::get_instance();
+            $required_files = [
+                '/src/Mpdf.php',
+                '/src/Config/ConfigVariables.php',
+                '/src/Config/FontVariables.php'
+            ];
+
+            foreach ($required_files as $file) {
+                if (!file_exists($path . $file)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    }
+
+    // Run on plugins_loaded to ensure WordPress is fully loaded
+    add_action('plugins_loaded', 'run_wp_mpdf');
+    
+    /**
+     * Helper function untuk akses global instance
+     */
+    function wp_mpdf() {
+        return WP_MPDF::get_instance();
+    }
 }

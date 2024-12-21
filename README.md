@@ -2,6 +2,20 @@
 
 WordPress Plugin untuk mengintegrasikan mPDF library ke WordPress. Plugin ini menyediakan integrasi lengkap dengan mPDF versi 8.2.5, memungkinkan Anda untuk menggunakan semua fitur yang tersedia di mPDF library asli.
 
+mPDF adalah library PHP untuk menghasilkan file PDF dari HTML dengan encoding UTF-8.
+
+Versi ini menyertakan [FPDI 2.6.2](https://www.setasign.com/products/fpdi/about/) dari Setasign 
+untuk mendukung fungsi import PDF.
+
+[![Latest Stable Version](https://poser.pugx.org/mpdf/mpdf/v/stable)](https://packagist.org/packages/mpdf/mpdf)
+[![Total Downloads](https://poser.pugx.org/mpdf/mpdf/downloads)](https://packagist.org/packages/mpdf/mpdf)
+[![License](https://poser.pugx.org/mpdf/mpdf/license)](https://packagist.org/packages/mpdf/mpdf)
+
+
+> ⚠ Jika Anda melihat file ini di halaman GitHub repository mPDF atau di Packagist, perlu diketahui bahwa
+> branch default 'development' mungkin berbeda dari rilis stabil terakhir.
+
+
 ## Deskripsi
 
 WP mPDF adalah plugin WordPress yang mengintegrasikan library mPDF secara penuh. Plugin ini dirancang untuk memberikan akses ke semua fitur mPDF dalam lingkungan WordPress, menjadikannya solusi PDF yang paling lengkap untuk WordPress.
@@ -39,6 +53,7 @@ Untuk menggunakan fitur ini, pastikan Anda telah menginstal dan mengaktifkan WP 
 
 ## Instalasi
 
+### Instalasi mPDF 
 1. Download atau clone repository ini ke direktori `wp-content/plugins/` WordPress Anda
 2. **PENTING**: Download mPDF library
    ```bash
@@ -54,7 +69,27 @@ Untuk menggunakan fitur ini, pastikan Anda telah menginstal dan mengaktifkan WP 
    ```
    Atau Anda bisa download manual dari [mPDF GitHub Release v8.2.5](https://github.com/mpdf/mpdf/releases/tag/v8.2.5)
 
-3. Aktifkan plugin melalui menu 'Plugins' di WordPress
+
+### Instalasi FPDI
+----------------
+
+Paket ini sudah menyertakan FPDI 2.6.2. File-file FPDI harus berada di: ```bash libs/mpdf/fpdi/```
+
+Jika direktori tersebut tidak ada, Anda perlu:
+
+1. Download FPDI 2.6.2 dari [FPDI releases](https://github.com/Setasign/FPDI/releases/tag/v2.6.2)
+2. Buat direktori `libs/mpdf/fpdi/`
+3. Ekstrak file-file FPDI ke dalam direktori tersebut
+4. Pastikan struktur berikut ada:
+
+libs/mpdf/
+├── fpdi/
+│   └── src/
+│       └── FpdiTrait.php
+
+
+
+Setelah lengkap ktifkan plugin melalui menu 'Plugins' di WordPress
 
 ## Struktur Folder
 
