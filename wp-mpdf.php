@@ -118,18 +118,45 @@ if (wp_mpdf_check_system_requirements()) {
     register_deactivation_hook(__FILE__, array('WP_MPDF_Activator', 'deactivate'));
 
     /**
-     * Initialize plugin
+     * Initialize WP mPDF plugin.
+     * This function ensures the plugin is only initialized once by using a static flag.
+     * Prevents multiple initializations that could occur due to repeated 'plugins_loaded' hooks.
+     * 
+     * Problem:
+     * The original code would reinitialize the plugin every time 'plugins_loaded' was called,
+     * causing unnecessary object creation and resource usage.
+     * Debug logs showed initialization occurring every minute.
+     * 
+     * Solution:
+     * - Use static flag to track initialization state
+     * - Only initialize if not already done
+     * - Maintain debug logging for transparency
+     * 
+     * @since 1.0.1
+     * @see WP_MPDF::get_instance()
+     * @see WP_MPDF::run()
      */
     function run_wp_mpdf() {
+        // Static flag persists between function calls but is local to this function
+        static $initialized = false;
+        
+        // Skip if already initialized
+        if ($initialized) {
+            return;
+        }
+
         error_log('WP mPDF: Initializing plugin');
         
-        // Get plugin instance (will create if doesn't exist)
+        // Get singleton instance - will create if doesn't exist
         $plugin = WP_MPDF::get_instance();
         
-        // Run the plugin
+        // Initialize plugin systems
         $plugin->run();
         
         error_log('WP mPDF: Plugin initialized');
+        
+        // Mark as initialized to prevent future runs
+        $initialized = true;
     }
 
     if (!function_exists('wp_mpdf_get_library_path')) {
@@ -201,9 +228,11 @@ if (wp_mpdf_check_system_requirements()) {
         }
     }
 
-    // Run on plugins_loaded to ensure WordPress is fully loaded
+    // Hook to WordPress plugin initialization
+    // NOTE: While 'plugins_loaded' may fire multiple times,
+    // our static flag ensures single initialization
     add_action('plugins_loaded', 'run_wp_mpdf');
-    
+
     /**
      * Helper function untuk akses global instance
      */
