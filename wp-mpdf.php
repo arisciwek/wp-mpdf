@@ -160,13 +160,19 @@ if (wp_mpdf_check_system_requirements()) {
          */
         function wp_mpdf_get_pdf_settings() {
             try {
-                return WP_MPDF_Activator::get_mpdf_paths();
+                return [
+                    'library_path' => WP_MPDF_DIR . 'libs/mpdf',
+                    'src_path' => WP_MPDF_DIR . 'libs/mpdf/src',
+                    'temp_path' => trailingslashit(wp_upload_dir()['basedir']) . 'mpdf-temp',
+                    'font_path' => trailingslashit(wp_upload_dir()['basedir']) . 'mpdf-fonts/dejavu',
+                    'cache_path' => trailingslashit(wp_upload_dir()['basedir']) . 'mpdf-fonts'
+                ];
             } catch (Exception $e) {
                 return null;
             }
         }
     }
-    
+
     if (!function_exists('wp_mpdf_verify_library')) {
         /**
          * Verify mPDF library is complete and usable

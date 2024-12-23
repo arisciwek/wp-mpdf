@@ -46,17 +46,25 @@ class WP_MPDF_Loader {
      * Namespace prefix untuk mPDF
      */
     private $mpdf_prefix = 'Mpdf\\';
+    private $fpdi_prefix = 'setasign\\Fpdi\\';
+    private $psr_prefix = 'Psr\\Log\\';
+    private $mpdf_trait_prefix = 'Mpdf\\PsrLogAwareTrait\\';
+    
 
     /**
      * Base directory untuk mPDF files
      */
     private $mpdf_base_dir;
+    private $fpdi_base_dir;
+    private $psr_base_dir;
 
     /**
      * Constructor
      */
     public function __construct() {
         $this->mpdf_base_dir = WP_MPDF_DIR . 'libs/mpdf/src/';
+        $this->fpdi_base_dir = WP_MPDF_DIR . 'libs/mpdf/fpdi/src/';
+        $this->psr_base_dir = WP_MPDF_DIR . 'libs/psr/log/src/';
     }
 
     /**
@@ -67,6 +75,15 @@ class WP_MPDF_Loader {
 
         // Load mPDF core files yang dibutuhkan
         $this->load_mpdf();
+        
+        // Add class alias for PSR LoggerAwareTrait
+        if (!trait_exists('Mpdf\PsrLogAwareTrait\MpdfPsrLogAwareTrait', false)) {
+            class_alias('Psr\Log\LoggerAwareTrait', 'Mpdf\PsrLogAwareTrait\MpdfPsrLogAwareTrait');
+        }
+
+        if (!trait_exists('Mpdf\PsrLogAwareTrait\PsrLogAwareTrait', false)) {
+            class_alias('Psr\Log\LoggerAwareTrait', 'Mpdf\PsrLogAwareTrait\PsrLogAwareTrait');
+        }
     }
 
     /**
@@ -76,21 +93,46 @@ class WP_MPDF_Loader {
      * @return void
      */
     public function autoload($class) {
-        // Check if class menggunakan mPDF namespace
-        $len = strlen($this->mpdf_prefix);
-        if (strncmp($this->mpdf_prefix, $class, $len) !== 0) {
-            return;
+
+        // Special case untuk LoggerAwareTrait
+        if ($class === 'Mpdf\PsrLogAwareTrait\MpdfPsrLogAwareTrait') {
+            $trait_file = $this->psr_base_dir . 'LoggerAwareTrait.php';
+            if (file_exists($trait_file)) {
+                require $trait_file;
+                return;
+            }
         }
 
-        // Get relative class name
-        $relative_class = substr($class, $len);
+        // Check PSR namespace
+        $psr_len = strlen($this->psr_prefix);
+        if (strncmp($this->psr_prefix, $class, $psr_len) === 0) {
+            $relative_class = substr($class, $psr_len);
+            $file = $this->psr_base_dir . str_replace('\\', '/', $relative_class) . '.php';
+            if (file_exists($file)) {
+                require $file;
+                return;
+            }
+        }
 
-        // Convert ke file path
-        $file = $this->mpdf_base_dir . str_replace('\\', '/', $relative_class) . '.php';
+        // Check mPDF namespace
+        $mpdf_len = strlen($this->mpdf_prefix);
+        if (strncmp($this->mpdf_prefix, $class, $mpdf_len) === 0) {
+            $relative_class = substr($class, $mpdf_len);
+            $file = $this->mpdf_base_dir . str_replace('\\', '/', $relative_class) . '.php';
+            if (file_exists($file)) {
+                require $file;
+                return;
+            }
+        }
 
-        // Load file jika exists
-        if (file_exists($file)) {
-            require $file;
+        // Check FPDI namespace
+        $fpdi_len = strlen($this->fpdi_prefix);
+        if (strncmp($this->fpdi_prefix, $class, $fpdi_len) === 0) {
+            $relative_class = substr($class, $fpdi_len);
+            $file = $this->fpdi_base_dir . str_replace('\\', '/', $relative_class) . '.php';
+            if (file_exists($file)) {
+                require $file;
+            }
         }
     }
 
