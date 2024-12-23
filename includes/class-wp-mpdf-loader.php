@@ -59,12 +59,19 @@ class WP_MPDF_Loader {
     private $psr_base_dir;
 
     /**
+     * Base directory untuk QRCode files
+     */
+    private $qrcode_base_dir;
+
+
+    /**
      * Constructor
      */
     public function __construct() {
         $this->mpdf_base_dir = WP_MPDF_DIR . 'libs/mpdf/src/';
         $this->fpdi_base_dir = WP_MPDF_DIR . 'libs/mpdf/fpdi/src/';
         $this->psr_base_dir = WP_MPDF_DIR . 'libs/psr/log/src/';
+        $this->qrcode_base_dir = WP_MPDF_DIR . 'libs/QrCode/src/';  // Path baru        
     }
 
     /**
@@ -134,6 +141,17 @@ class WP_MPDF_Loader {
                 require $file;
             }
         }
+
+        // Handle QR code namespace
+        if (strpos($class, 'QrCode\\') === 0) {
+            $relative_class = substr($class, strlen('QrCode\\'));
+            $file = $this->qrcode_base_dir . str_replace('\\', '/', $relative_class) . '.php';
+            if (file_exists($file)) {
+                require $file;
+                return;
+            }
+        }
+
     }
 
     /**
