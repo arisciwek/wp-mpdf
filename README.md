@@ -88,8 +88,33 @@ libs/mpdf/
 │       └── FpdiTrait.php
 
 
+### Instalasi QR Code Library
+Untuk mendukung QR Code generation di PDF, ikuti langkah tambahan berikut:
 
-Setelah lengkap ktifkan plugin melalui menu 'Plugins' di WordPress
+1. Download QR Code library
+   ```bash
+   # Buat folder libs/QrCode di dalam direktori plugin
+   mkdir -p wp-content/plugins/wp-mpdf/libs/QrCode
+
+   # Download QR Code library
+   wget [https://github.com/mpdf/qrcode.git]
+
+   # Extract file ke folder libs/QrCode
+   unzip qrcode.zip -d wp-content/plugins/wp-mpdf/libs/QrCode/
+
+```
+Atau Anda bisa download manual dari [QR Code Library Release URL]
+Pastikan struktur folder menjadi:
+
+wp-mpdf/
+├── libs/
+│   ├── mpdf/          # mPDF library
+│   ├── QrCode/        # QR Code library
+│   │   └── src/
+│   └── psr/           # PSR library
+
+
+Setelah lengkap aktifkan plugin melalui menu 'Plugins' di WordPress
 
 ## Struktur Folder
 

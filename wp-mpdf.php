@@ -66,6 +66,7 @@ define('WP_MPDF_FILE', __FILE__);
 define('WP_MPDF_DIR', plugin_dir_path(__FILE__));
 define('WP_MPDF_URL', plugin_dir_url(__FILE__));
 define('WP_MPDF_BASENAME', plugin_basename(__FILE__));
+define('WP_MPDF_QRCODE_PATH', WP_MPDF_DIR . 'libs/QrCode/src/');
 
 /**
  * Check system requirements before loading plugin
@@ -112,6 +113,9 @@ if (wp_mpdf_check_system_requirements()) {
     require_once WP_MPDF_DIR . 'includes/class-wp-mpdf.php';
     require_once WP_MPDF_DIR . 'includes/class-wp-mpdf-activator.php';
     require_once WP_MPDF_DIR . 'includes/class-wp-mpdf-settings.php';
+
+    // After loading required files
+    require_once WP_MPDF_DIR . 'includes/class-wp-mpdf-qrcode.php';
 
     // Register activation/deactivation hooks
     register_activation_hook(__FILE__, array('WP_MPDF_Activator', 'activate'));
@@ -232,6 +236,9 @@ if (wp_mpdf_check_system_requirements()) {
     // NOTE: While 'plugins_loaded' may fire multiple times,
     // our static flag ensures single initialization
     add_action('plugins_loaded', 'run_wp_mpdf');
+
+    // Initialize QR setup
+    WP_Mpdf_QrCode::init();
 
     /**
      * Helper function untuk akses global instance

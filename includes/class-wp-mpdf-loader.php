@@ -142,9 +142,8 @@ class WP_MPDF_Loader {
             }
         }
 
-        // Handle QR code namespace
-        if (strpos($class, 'QrCode\\') === 0) {
-            $relative_class = substr($class, strlen('QrCode\\'));
+        if (strpos($class, 'Mpdf\\QrCode\\') === 0) {
+            $relative_class = substr($class, strlen('Mpdf\\QrCode\\'));
             $file = $this->qrcode_base_dir . str_replace('\\', '/', $relative_class) . '.php';
             if (file_exists($file)) {
                 require $file;
