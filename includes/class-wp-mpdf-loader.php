@@ -142,14 +142,21 @@ class WP_MPDF_Loader {
             }
         }
 
+        // QrCode namespace check
         if (strpos($class, 'Mpdf\\QrCode\\') === 0) {
             $relative_class = substr($class, strlen('Mpdf\\QrCode\\'));
             $file = $this->qrcode_base_dir . str_replace('\\', '/', $relative_class) . '.php';
+            error_log("Looking for QR Code file: " . $file);
+            
             if (file_exists($file)) {
+                error_log("Loading QR Code file: " . $file);
                 require $file;
                 return;
+            } else {
+                error_log("QR Code file not found: " . $file);
             }
-        }
+
+        }   
 
     }
 
