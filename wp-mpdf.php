@@ -140,6 +140,7 @@ if (wp_mpdf_check_system_requirements()) {
      * @see WP_MPDF::get_instance()
      * @see WP_MPDF::run()
      */
+/*    
     function run_wp_mpdf() {
         // Static flag persists between function calls but is local to this function
         static $initialized = false;
@@ -153,15 +154,18 @@ if (wp_mpdf_check_system_requirements()) {
         
         // Get singleton instance - will create if doesn't exist
         $plugin = WP_MPDF::get_instance();
-        
-        // Initialize plugin systems
-        $plugin->run();
+            
+        // Hook fungsi-fungsi yang perlu dijalankan per request ke 'init'
+        add_action('init', function() use ($plugin) {
+            $plugin->run();
+        });
         
         error_log('WP mPDF: Plugin initialized');
         
         // Mark as initialized to prevent future runs
         $initialized = true;
     }
+*/
 
     if (!function_exists('wp_mpdf_get_library_path')) {
         /**
@@ -235,8 +239,92 @@ if (wp_mpdf_check_system_requirements()) {
     // Hook to WordPress plugin initialization
     // NOTE: While 'plugins_loaded' may fire multiple times,
     // our static flag ensures single initialization
-    add_action('plugins_loaded', 'run_wp_mpdf');
+    
+    /*
+    if (!has_action('plugins_loaded', 'run_wp_mpdf')) {
 
+        error_log('WP mPDF: !has_action (plugins_loaded)');
+
+        add_action('plugins_loaded', 'run_wp_mpdf');
+
+        error_log('WP mPDF: plugins_loaded');
+
+    }
+    */
+
+if (!function_exists('wp_mpdf_init')) {
+    function wp_mpdf_init() {
+        static $initialized = false;
+        
+        //error_log('WP mPDF Init: Starting initialization check');
+        
+        if ($initialized) {
+            error_log('WP mPDF Init: Already initialized, skipping');
+            return true;
+        }
+
+        //error_log('WP mPDF Init: Loading required files');
+
+        // Load required files
+        if (!file_exists(WP_MPDF_DIR . 'includes/class-wp-mpdf-loader.php')) {
+            error_log('WP mPDF Init: ERROR - Loader file not found');
+            return false;
+        }
+        require_once WP_MPDF_DIR . 'includes/class-wp-mpdf-loader.php';
+        
+        if (!file_exists(WP_MPDF_DIR . 'includes/class-wp-mpdf.php')) {
+            error_log('WP mPDF Init: ERROR - Main class file not found');
+            return false;
+        }
+        require_once WP_MPDF_DIR . 'includes/class-wp-mpdf.php';
+        
+        if (!file_exists(WP_MPDF_DIR . 'includes/class-wp-mpdf-activator.php')) {
+            error_log('WP mPDF Init: ERROR - Activator file not found');
+            return false;
+        }
+        require_once WP_MPDF_DIR . 'includes/class-wp-mpdf-activator.php';
+        
+        if (!file_exists(WP_MPDF_DIR . 'includes/class-wp-mpdf-settings.php')) {
+            error_log('WP mPDF Init: ERROR - Settings file not found');
+            return false;
+        }
+        require_once WP_MPDF_DIR . 'includes/class-wp-mpdf-settings.php';
+        
+        if (!file_exists(WP_MPDF_DIR . 'includes/class-wp-mpdf-qrcode.php')) {
+            error_log('WP mPDF Init: ERROR - QRCode file not found');
+            return false;
+        }
+        require_once WP_MPDF_DIR . 'includes/class-wp-mpdf-qrcode.php';
+
+        error_log('WP mPDF Init: All required files loaded successfully');
+
+        try {
+            //error_log('WP mPDF Init: Initializing loader');
+            // Initialize loader
+            $loader = new WP_MPDF_Loader();
+            
+            //error_log('WP mPDF Init: Registering autoloader');
+            // Register autoloader
+            $loader->register();
+            
+            //error_log('WP mPDF Init: Autoloader registered successfully');
+            $initialized = true;
+            
+            // Verify QRCode class is available
+            if (class_exists('\Mpdf\QrCode\QrCode')) {
+                error_log('WP mPDF Init: QRCode class is available');
+            } else {
+                error_log('WP mPDF Init: WARNING - QRCode class is not available');
+            }
+            
+            return true;
+        } catch (Exception $e) {
+            error_log('WP mPDF Init: ERROR during initialization - ' . $e->getMessage());
+            error_log('WP mPDF Init: Stack trace - ' . $e->getTraceAsString());
+            return false;
+        }
+    }
+}
     // Initialize QR setup
     WP_Mpdf_QrCode::init();
 
